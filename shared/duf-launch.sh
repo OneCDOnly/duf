@@ -33,11 +33,13 @@ fi
 
 readonly GETCFG_CMD=/sbin/getcfg
 readonly QPKG_PATH=$($GETCFG_CMD $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
-readonly BINLINK_PATHFILE=$QPKG_PATH/duf.lnk
-export COLORTERM=truecolor      # this intermediate script only exists to ensure this environment variable is set, so 'duf' displays in colour
+readonly BIN_PATHFILE=$QPKG_PATH/duf.bin
 
-if [[ -e $BINLINK_PATHFILE ]]; then
-    eval "$BINLINK_PATHFILE" "$@"
+# this intermediate script exists only to ensure this environment variable is set, so 'duf' displays in colour
+export COLORTERM=truecolor
+
+if [[ -e $BIN_PATHFILE ]]; then
+    eval "$BIN_PATHFILE" "$@"
 else
     echo "error: unable to find 'duf' binary!"
     exit 1

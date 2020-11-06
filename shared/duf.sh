@@ -40,47 +40,8 @@ Init()
     readonly SOURCE_BINARIES_PATH=$QPKG_PATH/bin
     readonly NAS_FIRMWARE=$($GETCFG_CMD System Version -f $ULINUX_PATHFILE)
     readonly PLATFORM_PATHFILE=/etc/platform.conf
-    readonly BINLINK_PATHFILE=$QPKG_PATH/duf.lnk
     readonly LAUNCHER_PATHFILE=$QPKG_PATH/duf-launch.sh
     readonly USERLINK_PATHFILE=/usr/bin/duf
-
-    Session.Calc.QPKGArch
-
-    }
-
-Session.Calc.QPKGArch()
-    {
-
-    # Decide which package arch is suitable for this NAS.
-    # creates a global constant: $NAS_QPKG_ARCH
-
-    case $($UNAME_CMD -m) in
-        x86_64)
-            [[ ${NAS_FIRMWARE//.} -ge 430 ]] && NAS_QPKG_ARCH=x64 || NAS_QPKG_ARCH=x86
-            ;;
-        i686|x86)
-            NAS_QPKG_ARCH=x86
-            ;;
-        armv7l)
-            case $($GETCFG_CMD '' Platform -f $PLATFORM_PATHFILE) in
-                ARM_AL)
-                    NAS_QPKG_ARCH=x41
-                    ;;
-                *)
-                    NAS_QPKG_ARCH=none
-                    ;;
-            esac
-            ;;
-        aarch64)
-            NAS_QPKG_ARCH=a64
-            ;;
-        *)
-            NAS_QPKG_ARCH=none
-            ;;
-    esac
-
-    readonly NAS_QPKG_ARCH
-    return 0
 
     }
 
@@ -88,30 +49,18 @@ Init
 
 case "$1" in
     start)
-        case $NAS_QPKG_ARCH in
-            x86|x64)
-                [[ ! -L $BINLINK_PATHFILE ]] && ln -s "$SOURCE_BINARIES_PATH/duf-$NAS_QPKG_ARCH.bin" "$BINLINK_PATHFILE"
-                [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
+        [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
 
-                if [[ -L $BINLINK_PATHFILE && -L $USERLINK_PATHFILE ]]; then
-                    echo "'duf' linked"
-                else
-                    echo "error: unable to link 'duf' binary!"
-                fi
-                ;;
-            *)
-                echo "error: a 'duf' binary is not yet available for this CPU architecture: $(UNAME_CMD -m)"
-                [[ -L $BINLINK_PATHFILE ]] && rm -f "$BINLINK_PATHFILE"
-                [[ -L $USERLINK_PATHFILE ]] && rm -f "$USERLINK_PATHFILE"
-                exit 1
-                ;;
-        esac
+        if [[ -L $USERLINK_PATHFILE ]]; then
+            echo "symlink created: $USERLINK_PATHFILE"
+        else
+            echo "error: unable to create symlink to 'duf' launcher!"
+        fi
         ;;
     stop)
-        if [[ -L $BINLINK_PATHFILE || -L $USERLINK_PATHFILE ]]; then
-            rm -f "$BINLINK_PATHFILE"
+        if [[ -L $USERLINK_PATHFILE ]]; then
             rm -f "$USERLINK_PATHFILE"
-            echo "'duf' unlinked"
+            echo "symlink removed: $USERLINK_PATHFILE"
         fi
         ;;
     restart)
