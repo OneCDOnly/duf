@@ -4,10 +4,11 @@
 #
 # This script is part of the 'duf' package
 #
-# For more info: []
+# For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=157781]
 #
-# Available in the Qnapclub Store: []
-# Project source: []
+# Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/1027]
+# QPKG source: [https://github.com/OneCDOnly/duf]
+# Project source: [https://github.com/muesli/duf]
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -23,17 +24,7 @@
 # this program. If not, see http://www.gnu.org/licenses/.
 ############################################################################
 
-readonly THIS_QPKG_NAME=duf
-readonly CONFIG_PATHFILE=/etc/config/qpkg.conf
-
-if [[ ! -e $CONFIG_PATHFILE ]]; then
-    echo "file not found [$CONFIG_PATHFILE]"
-    exit 1
-fi
-
-readonly GETCFG_CMD=/sbin/getcfg
-readonly QPKG_PATH=$($GETCFG_CMD $THIS_QPKG_NAME Install_Path -f "$CONFIG_PATHFILE")
-readonly BIN_PATHFILE=$QPKG_PATH/duf.bin
+readonly BIN_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf.bin
 
 # this intermediate script exists only to ensure this environment variable is set, so 'duf' displays in colour
 export COLORTERM=truecolor
