@@ -48,7 +48,7 @@ case "$1" in
         $0 start
         ;;
     *)
-        echo "run init as: $0 {start|stop|restart}"
+        echo "run service script as: $0 {start|stop|restart}"
         echo "to launch 'duf', type: duf"
         ;;
 esac
