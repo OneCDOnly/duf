@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ############################################################################
-# duf.sh - (C)opyright 2020 OneCD [one.cd.only@gmail.com]
+# duf.sh - (C)opyright 2020-2022 OneCD [one.cd.only@gmail.com]
 #
 # This script is part of the 'duf' package
 #
@@ -24,8 +24,41 @@
 # this program. If not, see http://www.gnu.org/licenses/.
 ############################################################################
 
-readonly LAUNCHER_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
-readonly USERLINK_PATHFILE=/usr/bin/duf
+Init()
+    {
+
+    QPKG_NAME=duf
+
+    readonly LAUNCHER_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
+    readonly USERLINK_PATHFILE=/usr/bin/duf
+    readonly SERVICE_STATUS_PATHFILE=/var/run/$QPKG_NAME.last.operation
+
+    }
+
+SetServiceOperationResultOK()
+    {
+
+    SetServiceOperationResult ok
+
+    }
+
+SetServiceOperationResultFailed()
+    {
+
+    SetServiceOperationResult failed
+
+    }
+
+SetServiceOperationResult()
+    {
+
+    # $1 = result of operation to recorded
+
+    [[ -n $1 && -n $SERVICE_STATUS_PATHFILE ]] && echo "$1" > "$SERVICE_STATUS_PATHFILE"
+
+    }
+
+Init
 
 case "$1" in
     start)
@@ -33,14 +66,17 @@ case "$1" in
 
         if [[ -L $USERLINK_PATHFILE ]]; then
             echo "symlink created: $USERLINK_PATHFILE"
+            SetServiceOperationResultOK
         else
             echo "error: unable to create symlink to 'duf' launcher!"
+            SetServiceOperationResultFailed
         fi
         ;;
     stop)
         if [[ -L $USERLINK_PATHFILE ]]; then
             rm -f "$USERLINK_PATHFILE"
             echo "symlink removed: $USERLINK_PATHFILE"
+            SetServiceOperationResultOK
         fi
         ;;
     restart)
@@ -50,7 +86,6 @@ case "$1" in
     *)
         echo "run service script as: $0 {start|stop|restart}"
         echo "to launch 'duf', type: duf"
-        ;;
 esac
 
 exit 0
