@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 ############################################################################
-# duf-launch.sh - (C)opyright 2020 OneCD [one.cd.only@gmail.com]
+# duf-launch.sh
+#   copyright 2020 OneCD.
+#
+# Contact:
+#   one.cd.only@gmail.com
 #
 # This script is part of the 'duf' package
 #
 # For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=157781]
 #
-# Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/1027]
 # QPKG source: [https://github.com/OneCDOnly/duf]
 # Project source: [https://github.com/muesli/duf]
 #

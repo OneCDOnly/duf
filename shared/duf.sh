@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 ############################################################################
-# duf.sh - (C)opyright 2020-2022 OneCD [one.cd.only@gmail.com]
+# duf.sh
+#   copyright 2020-2024 OneCD.
+#
+# Contact:
+#   one.cd.only@gmail.com
 #
 # This script is part of the 'duf' package
 #
 # For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=157781]
 #
-# Available in the Qnapclub Store: [https://qnapclub.eu/en/qpkg/1027]
 # QPKG source: [https://github.com/OneCDOnly/duf]
 # Project source: [https://github.com/muesli/duf]
 #
@@ -58,18 +61,65 @@ SetServiceOperationResult()
 
     }
 
+IsQPKGEnabled()
+	{
+
+	# input:
+	#   $1 = (optional) package name to check. If unspecified, default is $QPKG_NAME
+
+	# output:
+	#   $? = 0 : true
+	#   $? = 1 : false
+
+	[[ $(Lowercase "$(/sbin/getcfg "${1:-$QPKG_NAME}" Enable -d false -f /etc/config/qpkg.conf)") = true ]]
+
+	}
+
+IsNotQPKGEnabled()
+	{
+
+	# input:
+	#   $1 = (optional) package name to check. If unspecified, default is $QPKG_NAME
+
+	# output:
+	#   $? = 0 : true
+	#   $? = 1 : false
+
+	! IsQPKGEnabled "${1:-$QPKG_NAME}"
+
+	}
+
+FormatAsPackageName()
+	{
+
+	echo -n "'${1:-}'"
+
+	}
+
+Lowercase()
+	{
+
+	/bin/tr 'A-Z' 'a-z' <<< "$1"
+
+	}
+
 Init
 
 case "$1" in
     start)
-        [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
-
-        if [[ -L $USERLINK_PATHFILE ]]; then
-            echo "symlink created: $USERLINK_PATHFILE"
-            SetServiceOperationResultOK
-        else
-            echo "error: unable to create symlink to 'duf' launcher!"
+        if IsNotQPKGEnabled; then
+            echo "$(FormatAsPackageName "$QPKG_NAME") QPKG is disabled. Please enable it first with: qpkg_service enable duf"
             SetServiceOperationResultFailed
+        else
+            [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
+
+            if [[ -L $USERLINK_PATHFILE ]]; then
+                echo "symlink created: $USERLINK_PATHFILE"
+                SetServiceOperationResultOK
+            else
+                echo "error: unable to create symlink to 'duf' launcher!"
+                SetServiceOperationResultFailed
+            fi
         fi
         ;;
     stop)
