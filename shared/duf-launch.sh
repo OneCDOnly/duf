@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ############################################################################
 # duf-launch.sh
-#   copyright 2020 OneCD.
+#   copyright 2020-2024 OneCD
 #
 # Contact:
 #   one.cd.only@gmail.com
@@ -24,12 +24,12 @@
 # details.
 #
 # You should have received a copy of the GNU General Public License along with
-# this program. If not, see http://www.gnu.org/licenses/.
+# this program. If not, see http://www.gnu.org/licenses/
 ############################################################################
 
 readonly BIN_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf.bin
 
-# this intermediate script exists only to ensure this environment variable is set, so 'duf' displays in colour
+# This intermediate script exists only to ensure the following environment variable is set, so `duf` displays in colour.
 export COLORTERM=truecolor
 
 if [[ -e $BIN_PATHFILE ]]; then

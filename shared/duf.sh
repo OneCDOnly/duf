@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ############################################################################
 # duf.sh
-#   copyright 2020-2024 OneCD.
+#   copyright 2020-2024 OneCD
 #
 # Contact:
 #   one.cd.only@gmail.com
@@ -24,42 +24,117 @@
 # details.
 #
 # You should have received a copy of the GNU General Public License along with
-# this program. If not, see http://www.gnu.org/licenses/.
+# this program. If not, see http://www.gnu.org/licenses/
 ############################################################################
+
+shopt -s extglob
+ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
 
 Init()
     {
 
-    QPKG_NAME=duf
+    readonly QPKG_NAME=duf
 
     readonly LAUNCHER_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
+	readonly SERVICE_ACTION_PATHFILE=/var/log/$QPKG_NAME.action
+	readonly SERVICE_RESULT_PATHFILE=/var/log/$QPKG_NAME.result
     readonly USERLINK_PATHFILE=/usr/bin/duf
-    readonly SERVICE_STATUS_PATHFILE=/var/run/$QPKG_NAME.last.operation
 
     }
 
-SetServiceOperationResultOK()
+StartQPKG()
     {
 
-    SetServiceOperationResult ok
+    if IsNotQPKGEnabled; then
+        echo 'This QPKG is disabled. Please enable it first with: qpkg_service enable duf'
+        return 1
+    else
+        [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
+
+        if [[ -L $USERLINK_PATHFILE ]]; then
+            echo "symlink created: $USERLINK_PATHFILE"
+        else
+            echo "error: unable to create symlink to 'duf' launcher!"
+            return 1
+        fi
+    fi
 
     }
 
-SetServiceOperationResultFailed()
+StopQPKG()
     {
 
-    SetServiceOperationResult failed
+    if [[ -L $USERLINK_PATHFILE ]]; then
+        rm -f "$USERLINK_PATHFILE"
+        echo "symlink removed: $USERLINK_PATHFILE"
+    else
+        echo "error: unable to remove symlink to 'duf' launcher!"
+        return 1
+    fi
 
     }
 
-SetServiceOperationResult()
-    {
+StatusQPKG()
+	{
 
-    # $1 = result of operation to recorded
+    if [[ -L $USERLINK_PATHFILE ]]; then
+        echo active
+        exit 0
+    else
+        echo inactive
+        exit 1
+    fi
 
-    [[ -n $1 && -n $SERVICE_STATUS_PATHFILE ]] && echo "$1" > "$SERVICE_STATUS_PATHFILE"
+	}
 
-    }
+SetServiceAction()
+	{
+
+	service_action=${1:-none}
+	CommitServiceAction
+	SetServiceResultAsInProgress
+
+	}
+
+SetServiceResultAsOK()
+	{
+
+	service_result=ok
+	CommitServiceResult
+
+	}
+
+SetServiceResultAsFailed()
+	{
+
+	service_result=failed
+	CommitServiceResult
+
+	}
+
+SetServiceResultAsInProgress()
+	{
+
+	# Selected action is in-progress and hasn't generated a result yet.
+
+	service_result=in-progress
+	CommitServiceResult
+
+	}
+
+CommitServiceAction()
+	{
+
+    echo "$service_action" > "$SERVICE_ACTION_PATHFILE"
+
+	}
+
+CommitServiceResult()
+	{
+
+    echo "$service_result" > "$SERVICE_RESULT_PATHFILE"
+
+	}
 
 IsQPKGEnabled()
 	{
@@ -89,13 +164,6 @@ IsNotQPKGEnabled()
 
 	}
 
-FormatAsPackageName()
-	{
-
-	echo -n "'${1:-}'"
-
-	}
-
 Lowercase()
 	{
 
@@ -106,35 +174,38 @@ Lowercase()
 Init
 
 case "$1" in
-    start)
-        if IsNotQPKGEnabled; then
-            echo "$(FormatAsPackageName "$QPKG_NAME") QPKG is disabled. Please enable it first with: qpkg_service enable duf"
-            SetServiceOperationResultFailed
-        else
-            [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
+    ?(--)start)
+        SetServiceAction start
 
-            if [[ -L $USERLINK_PATHFILE ]]; then
-                echo "symlink created: $USERLINK_PATHFILE"
-                SetServiceOperationResultOK
-            else
-                echo "error: unable to create symlink to 'duf' launcher!"
-                SetServiceOperationResultFailed
-            fi
+        if StartQPKG; then
+            SetServiceResultAsOK
+        else
+            SetServiceResultAsFailed
         fi
         ;;
-    stop)
-        if [[ -L $USERLINK_PATHFILE ]]; then
-            rm -f "$USERLINK_PATHFILE"
-            echo "symlink removed: $USERLINK_PATHFILE"
-            SetServiceOperationResultOK
+    ?(-)s|?(--)status)
+        StatusQPKG
+        ;;
+    ?(--)stop)
+        SetServiceAction stop
+
+        if StopQPKG; then
+            SetServiceResultAsOK
+        else
+            SetServiceResultAsFailed
         fi
         ;;
-    restart)
-        $0 stop
-        $0 start
+    ?(-)r|?(--)restart)
+        SetServiceAction restart
+
+        if StopQPKG && StartQPKG; then
+            SetServiceResultAsOK
+        else
+            SetServiceResultAsFailed
+        fi
         ;;
     *)
-        echo "run service script as: $0 {start|stop|restart}"
+        echo "run service script as: $0 {start|stop|restart|status}"
         echo "to launch 'duf', type: duf"
 esac
 
