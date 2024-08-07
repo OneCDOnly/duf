@@ -8,10 +8,9 @@
 #
 # This script is part of the 'duf' package
 #
-# For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=157781]
-#
-# QPKG source: [https://github.com/OneCDOnly/duf]
-# Project source: [https://github.com/muesli/duf]
+# QPKG source: https://github.com/OneCDOnly/duf
+# Project source: https://github.com/muesli/duf
+# Community forum: https://forum.qnap.com/viewtopic.php?t=157781
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
