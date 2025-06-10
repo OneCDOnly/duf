@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ############################################################################
 # duf.sh
-#   copyright 2020-2024 OneCD
+#   Copyright 2020-2025 OneCD
 #
 # Contact:
 #   one.cd.only@gmail.com
@@ -67,8 +67,7 @@ StopQPKG()
         rm -f "$USERLINK_PATHFILE"
         echo "symlink removed: $USERLINK_PATHFILE"
     else
-        echo "error: unable to remove symlink to 'duf' launcher!"
-        return 1
+        echo "no 'duf' symlink present"
     fi
 
     }

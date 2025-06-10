@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ############################################################################
 # duf-launch.sh
-#   copyright 2020-2024 OneCD
+#   Copyright 2020-2025 OneCD
 #
 # Contact:
 #   one.cd.only@gmail.com
