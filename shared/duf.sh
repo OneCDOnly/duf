@@ -6,11 +6,23 @@
 # Contact:
 #   one.cd.only@gmail.com
 #
-# This script is part of the 'duf' package
+# Description:
+#   This script is part of the 'duf' package
 #
-# QPKG source: https://github.com/OneCDOnly/duf
-# Project source: https://github.com/muesli/duf
-# Community forum: https://forum.qnap.com/viewtopic.php?t=157781
+# Available in the MyQNAP store:
+#	https://www.myqnap.org/product/duf
+#
+# And via the sherpa package manager:
+#	https://git.io/sherpa
+#
+# QPKG source:
+#   https://github.com/OneCDOnly/duf
+#
+# Application source:
+#   https://github.com/muesli/duf
+#
+# Community forum:
+#   https://community.qnap.com/t/qpkg-duf-cli/1100
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -26,18 +38,20 @@
 # this program. If not, see http://www.gnu.org/licenses/
 ############################################################################
 
+set -o nounset -o pipefail
 shopt -s extglob
-ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
+[[ -L /dev/fd ]] || ln -fns /proc/self/fd /dev/fd		# KLUDGE: `/dev/fd` isn't always created by QTS.
+readonly r_user_args_raw=$*
 
 Init()
     {
 
-    readonly QPKG_NAME=duf
+    readonly r_qpkg_name=duf
 
-    readonly LAUNCHER_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
-	readonly SERVICE_ACTION_PATHFILE=/var/log/$QPKG_NAME.action
-	readonly SERVICE_RESULT_PATHFILE=/var/log/$QPKG_NAME.result
-    readonly USERLINK_PATHFILE=/usr/bin/duf
+    readonly r_launcher_pathfile=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
+	readonly r_service_action_pathfile=/var/log/$r_qpkg_name.action
+	readonly r_service_result_pathfile=/var/log/$r_qpkg_name.result
+    readonly r_userlink_pathfile=/usr/bin/duf
 
     }
 
@@ -48,10 +62,10 @@ StartQPKG()
         echo 'This QPKG is disabled. Please enable it first with: qpkg_service enable duf'
         return 1
     else
-        [[ ! -L $USERLINK_PATHFILE && -e $LAUNCHER_PATHFILE ]] && ln -s "$LAUNCHER_PATHFILE" "$USERLINK_PATHFILE"
+        [[ ! -L $r_userlink_pathfile && -e $r_launcher_pathfile ]] && ln -s "$r_launcher_pathfile" "$r_userlink_pathfile"
 
-        if [[ -L $USERLINK_PATHFILE ]]; then
-            echo "symlink created: $USERLINK_PATHFILE"
+        if [[ -L $r_userlink_pathfile ]]; then
+            echo "symlink created: $r_userlink_pathfile"
         else
             echo "error: unable to create symlink to 'duf' launcher!"
             return 1
@@ -63,9 +77,15 @@ StartQPKG()
 StopQPKG()
     {
 
-    if [[ -L $USERLINK_PATHFILE ]]; then
-        rm -f "$USERLINK_PATHFILE"
-        echo "symlink removed: $USERLINK_PATHFILE"
+    if [[ -L $r_userlink_pathfile ]]; then
+        rm -f "$r_userlink_pathfile"
+
+        if [[ ! -L $r_userlink_pathfile ]]; then
+            echo "symlink removed: $r_userlink_pathfile"
+        else
+            echo "error: unable to remove symlink to 'duf' launcher!"
+            return 1
+        fi
     else
         echo "no 'duf' symlink present"
     fi
@@ -75,7 +95,7 @@ StopQPKG()
 StatusQPKG()
 	{
 
-    if [[ -L $USERLINK_PATHFILE ]]; then
+    if [[ -L $r_userlink_pathfile ]]; then
         echo active
         exit 0
     else
@@ -123,55 +143,57 @@ SetServiceResultAsInProgress()
 CommitServiceAction()
 	{
 
-    echo "$service_action" > "$SERVICE_ACTION_PATHFILE"
+    echo "$service_action" > "$r_service_action_pathfile"
 
 	}
 
 CommitServiceResult()
 	{
 
-    echo "$service_result" > "$SERVICE_RESULT_PATHFILE"
+    echo "$service_result" > "$r_service_result_pathfile"
 
 	}
 
 IsQPKGEnabled()
 	{
 
-	# input:
-	#   $1 = (optional) package name to check. If unspecified, default is $QPKG_NAME
+	# Inputs: (local)
+	#   $1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
 
-	# output:
+	# Outputs: (local)
 	#   $? = 0 : true
 	#   $? = 1 : false
 
-	[[ $(Lowercase "$(/sbin/getcfg "${1:-$QPKG_NAME}" Enable -d false -f /etc/config/qpkg.conf)") = true ]]
+	[[ $(Lowercase "$(/sbin/getcfg ${1:-$r_qpkg_name} Enable -d false -f /etc/config/qpkg.conf)") = true ]]
 
 	}
 
 IsNotQPKGEnabled()
 	{
 
-	# input:
-	#   $1 = (optional) package name to check. If unspecified, default is $QPKG_NAME
+	# Inputs: (local)
+	#   $1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
 
-	# output:
+	# Outputs: (local)
 	#   $? = 0 : true
 	#   $? = 1 : false
 
-	! IsQPKGEnabled "${1:-$QPKG_NAME}"
+	! IsQPKGEnabled "${1:-$r_qpkg_name}"
 
 	}
 
 Lowercase()
 	{
 
-	/bin/tr 'A-Z' 'a-z' <<< "$1"
+	/bin/tr 'A-Z' 'a-z' <<< "${1:-}"
 
 	}
 
 Init
 
-case "$1" in
+user_arg=${r_user_args_raw%% *}		# Only process first argument.
+
+case $user_arg in
     ?(--)start)
         SetServiceAction start
 

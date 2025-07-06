@@ -8,10 +8,20 @@
 #
 # This script is part of the 'duf' package
 #
-# For more info: [https://forum.qnap.com/viewtopic.php?f=320&t=157781]
+# Available in the MyQNAP store:
+#	https://www.myqnap.org/product/duf
 #
-# QPKG source: [https://github.com/OneCDOnly/duf]
-# Project source: [https://github.com/muesli/duf]
+# And via the sherpa package manager:
+#	https://git.io/sherpa
+#
+# QPKG source:
+#   https://github.com/OneCDOnly/duf
+#
+# Application source:
+#   https://github.com/muesli/duf
+#
+# Community forum:
+#   https://community.qnap.com/t/qpkg-duf-cli/1100
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -27,13 +37,13 @@
 # this program. If not, see http://www.gnu.org/licenses/
 ############################################################################
 
-readonly BIN_PATHFILE=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf.bin
+readonly r_bin_pathfile=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf.bin
 
 # This intermediate script exists only to ensure the following environment variable is set, so `duf` displays in colour.
 export COLORTERM=truecolor
 
-if [[ -e $BIN_PATHFILE ]]; then
-    eval "$BIN_PATHFILE" "$@"
+if [[ -e $r_bin_pathfile ]]; then
+    eval "$r_bin_pathfile" "$@"
 else
     echo "error: unable to find 'duf' binary!"
     exit 1
