@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 ############################################################################
 # duf-launch.sh
-#   Copyright 2020-2025 OneCD
+#	Copyright 2020-2025 OneCD
 #
 # Contact:
-#   one.cd.only@gmail.com
+#	one.cd.only@gmail.com
 #
-# This script is part of the 'duf' package
+# This is the launcher script for the 'duf' QPKG
 #
 # Available in the MyQNAP store:
 #	https://www.myqnap.org/product/duf
@@ -15,13 +15,13 @@
 #	https://git.io/sherpa
 #
 # QPKG source:
-#   https://github.com/OneCDOnly/duf
+#	https://github.com/OneCDOnly/duf
 #
 # Application source:
-#   https://github.com/muesli/duf
+#	https://github.com/muesli/duf
 #
 # Community forum:
-#   https://community.qnap.com/t/qpkg-duf-cli/1100
+#	https://community.qnap.com/t/qpkg-duf-cli/1100
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -43,10 +43,10 @@ readonly r_bin_pathfile=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf
 export COLORTERM=truecolor
 
 if [[ -e $r_bin_pathfile ]]; then
-    eval "$r_bin_pathfile" "$@"
+	eval "$r_bin_pathfile" "$@"
 else
-    echo "error: unable to find 'duf' binary!"
-    exit 1
+	echo "error: unable to find 'duf' binary!"
+	exit 1
 fi
 
 exit 0

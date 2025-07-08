@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 ############################################################################
 # duf.sh
-#   Copyright 2020-2025 OneCD
+#	Copyright 2020-2025 OneCD
 #
 # Contact:
-#   one.cd.only@gmail.com
+#	one.cd.only@gmail.com
 #
 # Description:
-#   This script is part of the 'duf' package
+#	This is the service-script for the 'duf' QPKG.
 #
 # Available in the MyQNAP store:
 #	https://www.myqnap.org/product/duf
@@ -16,13 +16,13 @@
 #	https://git.io/sherpa
 #
 # QPKG source:
-#   https://github.com/OneCDOnly/duf
+#	https://github.com/OneCDOnly/duf
 #
 # Application source:
-#   https://github.com/muesli/duf
+#	https://github.com/muesli/duf
 #
 # Community forum:
-#   https://community.qnap.com/t/qpkg-duf-cli/1100
+#	https://community.qnap.com/t/qpkg-duf-cli/1100
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -44,64 +44,64 @@ shopt -s extglob
 readonly r_user_args_raw=$*
 
 Init()
-    {
+	{
 
-    readonly r_qpkg_name=duf
+	readonly r_qpkg_name=duf
 
-    readonly r_launcher_pathfile=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
+	readonly r_launcher_pathfile=$(/sbin/getcfg duf Install_Path -f /etc/config/qpkg.conf)/duf-launch.sh
 	readonly r_service_action_pathfile=/var/log/$r_qpkg_name.action
 	readonly r_service_result_pathfile=/var/log/$r_qpkg_name.result
-    readonly r_userlink_pathfile=/usr/bin/duf
+	readonly r_userlink_pathfile=/usr/bin/duf
 
-    }
+	}
 
 StartQPKG()
-    {
+	{
 
-    if IsNotQPKGEnabled; then
-        echo 'This QPKG is disabled. Please enable it first with: qpkg_service enable duf'
-        return 1
-    else
-        [[ ! -L $r_userlink_pathfile && -e $r_launcher_pathfile ]] && ln -s "$r_launcher_pathfile" "$r_userlink_pathfile"
+	if IsNotQPKGEnabled; then
+		echo 'This QPKG is disabled. Please enable it first with: qpkg_service enable duf'
+		return 1
+	else
+		[[ ! -L $r_userlink_pathfile && -e $r_launcher_pathfile ]] && ln -s "$r_launcher_pathfile" "$r_userlink_pathfile"
 
-        if [[ -L $r_userlink_pathfile ]]; then
-            echo "symlink created: $r_userlink_pathfile"
-        else
-            echo "error: unable to create symlink to 'duf' launcher!"
-            return 1
-        fi
-    fi
+		if [[ -L $r_userlink_pathfile ]]; then
+			echo "symlink created: $r_userlink_pathfile"
+		else
+			echo "error: unable to create symlink to 'duf' launcher!"
+			return 1
+		fi
+	fi
 
-    }
+	}
 
 StopQPKG()
-    {
+	{
 
-    if [[ -L $r_userlink_pathfile ]]; then
-        rm -f "$r_userlink_pathfile"
+	if [[ -L $r_userlink_pathfile ]]; then
+		rm -f "$r_userlink_pathfile"
 
-        if [[ ! -L $r_userlink_pathfile ]]; then
-            echo "symlink removed: $r_userlink_pathfile"
-        else
-            echo "error: unable to remove symlink to 'duf' launcher!"
-            return 1
-        fi
-    else
-        echo "no 'duf' symlink present"
-    fi
+		if [[ ! -L $r_userlink_pathfile ]]; then
+			echo "symlink removed: $r_userlink_pathfile"
+		else
+			echo "error: unable to remove symlink to 'duf' launcher!"
+			return 1
+		fi
+	else
+		echo "no 'duf' symlink present"
+	fi
 
-    }
+	}
 
 StatusQPKG()
 	{
 
-    if [[ -L $r_userlink_pathfile ]]; then
-        echo active
-        exit 0
-    else
-        echo inactive
-        exit 1
-    fi
+	if [[ -L $r_userlink_pathfile ]]; then
+		echo active
+		exit 0
+	else
+		echo inactive
+		exit 1
+	fi
 
 	}
 
@@ -143,14 +143,14 @@ SetServiceResultAsInProgress()
 CommitServiceAction()
 	{
 
-    echo "$service_action" > "$r_service_action_pathfile"
+	echo "$service_action" > "$r_service_action_pathfile"
 
 	}
 
 CommitServiceResult()
 	{
 
-    echo "$service_result" > "$r_service_result_pathfile"
+	echo "$service_result" > "$r_service_result_pathfile"
 
 	}
 
@@ -158,11 +158,11 @@ IsQPKGEnabled()
 	{
 
 	# Inputs: (local)
-	#   $1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
+	#	$1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
 
 	# Outputs: (local)
-	#   $? = 0 : true
-	#   $? = 1 : false
+	#	$? = 0 : true
+	#	$? = 1 : false
 
 	[[ $(Lowercase "$(/sbin/getcfg ${1:-$r_qpkg_name} Enable -d false -f /etc/config/qpkg.conf)") = true ]]
 
@@ -172,11 +172,11 @@ IsNotQPKGEnabled()
 	{
 
 	# Inputs: (local)
-	#   $1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
+	#	$1 = (optional) package name to check. If unspecified, default is $r_qpkg_name
 
 	# Outputs: (local)
-	#   $? = 0 : true
-	#   $? = 1 : false
+	#	$? = 0 : true
+	#	$? = 1 : false
 
 	! IsQPKGEnabled "${1:-$r_qpkg_name}"
 
@@ -194,39 +194,39 @@ Init
 user_arg=${r_user_args_raw%% *}		# Only process first argument.
 
 case $user_arg in
-    ?(--)start)
-        SetServiceAction start
+	?(--)start)
+		SetServiceAction start
 
-        if StartQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    ?(-)s|?(--)status)
-        StatusQPKG
-        ;;
-    ?(--)stop)
-        SetServiceAction stop
+		if StartQPKG; then
+			SetServiceResultAsOK
+		else
+			SetServiceResultAsFailed
+		fi
+		;;
+	?(-)s|?(--)status)
+		StatusQPKG
+		;;
+	?(--)stop)
+		SetServiceAction stop
 
-        if StopQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    ?(-)r|?(--)restart)
-        SetServiceAction restart
+		if StopQPKG; then
+			SetServiceResultAsOK
+		else
+			SetServiceResultAsFailed
+		fi
+		;;
+	?(-)r|?(--)restart)
+		SetServiceAction restart
 
-        if StopQPKG && StartQPKG; then
-            SetServiceResultAsOK
-        else
-            SetServiceResultAsFailed
-        fi
-        ;;
-    *)
-        echo "run service script as: $0 {start|stop|restart|status}"
-        echo "to launch 'duf', type: duf"
+		if StopQPKG && StartQPKG; then
+			SetServiceResultAsOK
+		else
+			SetServiceResultAsFailed
+		fi
+		;;
+	*)
+		echo "run service script as: $0 {start|stop|restart|status}"
+		echo "to launch 'duf', type: duf"
 esac
 
 exit 0
